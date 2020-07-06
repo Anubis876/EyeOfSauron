@@ -1,0 +1,13 @@
+
+
+Results=C:\PATH\Results
+LocalSubnet=192.168.*
+
+
+
+$SUMDays=3
+$SUMDays_Summary=365
+$To_Email=me@work.com
+$From_Email=Eye@work.com
+$SMTPServer=smtp.server.work.me
+$Subject="Daily report from Eye of Sauron"
