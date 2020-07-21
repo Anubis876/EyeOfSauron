@@ -155,13 +155,13 @@ function Get-NetStat {
 function Get-Updates {
     PROCESS {
         $updates = wmic qfe list | where {$_ -ne ""}
-        $updates = $updates[8..($updates.count)]
+        $updates = $updates[1..($updates.count)]
             foreach ($update in $updates){
                 $update = $update -replace '^\s\s+', ''
                 $update = $update -split '\s\s+'
                 $UProperties = @{
                 HotFixID = $update[3]
-                InstalledOn = $update[5]
+                InstalledOn = $update[4]
                 Description = $update[2]
             }
             New-Object -TypeName PSObject -Property $UProperties
@@ -373,15 +373,15 @@ Get-WmiObject -Class Win32_Service | Select-Object DisplayName,Name,PathName,Pro
 #*        Gather .exe files created w/in the last 24 hours, add key, and dump to CSV       *
 #*******************************************************************************************
 
-Get-ChildItem -path $SCANDIR -Recurse -Include *.exe | Where-Object {$_.CreationTime -gt (get-date).AddDays(-1)} | ForEach-Object {
-     $_ | Add-Member -MemberType NoteProperty -Name PSComputerName -Value $env:COMPUTERNAME -PassThru | Add-Member -MemberType NoteProperty -Name Date -Value $DATECUT -PassThru } | Select-Object PSComputerName,Date,Name,@{N='FileHash';E={(Get-FileHash $_.FullName -Algorithm SHA1).Hash}},Length,LastWriteTime | Export-Csv $DIR$env:COMPUTERNAME"_NewEXE.csv" -NoTypeInformation 
+Get-ChildItem -path $SCANDIR -Recurse -force -file | where-object {($_.extension -eq ".exe") -and ($_.CreationTime -gt (get-date).AddDays(-1))} | ForEach-Object {
+     $_ | Add-Member -MemberType NoteProperty -Name PSComputerName -Value $env:COMPUTERNAME -PassThru | Add-Member -MemberType NoteProperty -Name Date -Value $DATECUT -PassThru } | Select-Object PSComputerName,Date,Name,Directory,@{N='FileHash';E={(Get-FileHash $_.FullName -Algorithm SHA1).Hash}},Length,LastWriteTime,@{N='SignerCertificate';E={(Get-AuthenticodeSignature $_.FullName).signercertificate.Issuer}},@{N='CertificateVerification';E={(Get-AuthenticodeSignature $_.FullName).status}} | Export-Csv $DIR$env:COMPUTERNAME"_NewEXE.csv" -NoTypeInformation 
 
 #*******************************************************************************************
 #*        Gather all  files created w/in the last 24 hours, add key, and dump to CSV       *
 #*******************************************************************************************
 
-Get-ChildItem -path $SCANDIR -Recurse | Where-Object {$_.CreationTime -gt (get-date).AddDays(-1)} | ForEach-Object {
-     $_ | Add-Member -MemberType NoteProperty -Name PSComputerName -Value $env:COMPUTERNAME -PassThru | Add-Member -MemberType NoteProperty -Name Date -Value $DATECUT -PassThru } | Select-Object PSComputerName,Date,Name,@{N='FileHash';E={(Get-FileHash $_.FullName -Algorithm SHA1).Hash}},Length,LastWriteTime | Export-Csv $DIR$env:COMPUTERNAME"_NewFile.csv" -NoTypeInformation 
+Get-ChildItem -path $SCANDIR -Recurse -force -file | Where-Object {$_.CreationTime -gt (get-date).AddDays(-1)} | ForEach-Object {
+     $_ | Add-Member -MemberType NoteProperty -Name PSComputerName -Value $env:COMPUTERNAME -PassThru | Add-Member -MemberType NoteProperty -Name Date -Value $DATECUT -PassThru } | Select-Object PSComputerName,Date,Name,Directory,@{N='FileHash';E={(Get-FileHash $_.FullName -Algorithm SHA1).Hash}},Length,LastWriteTime,@{N='SignerCertificate';E={(Get-AuthenticodeSignature $_.FullName).signercertificate.Issuer}},@{N='CertificateVerification';E={(Get-AuthenticodeSignature $_.FullName).status}} | Export-Csv $DIR$env:COMPUTERNAME"_NewFile.csv" -NoTypeInformation 
 
 #*******************************************************************************************
 #*                   Gather all open shares, add key, and dump to CSV                      *

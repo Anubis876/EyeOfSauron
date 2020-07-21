@@ -86,6 +86,8 @@ function mainMenu {
             Write-Host -ForegroundColor Green " DNS Cache Queries"
         Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "15"; Write-Host -ForegroundColor Green -NoNewline "]"; `
             Write-Host -ForegroundColor Green " Active Outbound Session Queries"
+        Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "16"; Write-Host -ForegroundColor Green -NoNewline "]"; `
+            Write-Host -ForegroundColor Green " Scheduled Tasks Queries"
         $mainMenu = Read-Host "`nSelection (leave blank to quit)"
         # Launch submenu1
         if($mainMenu -eq 1){
@@ -173,8 +175,8 @@ function mainMenu {
             $Type = 'NewEXE'
             $Print = "Executable Files"
             $P1 = "Name"
-            $P2 = "Length"
-            $P3 = "LastWriteTime"
+            $P2 = "Directory"
+            $P3 = "Filehash"
             subMenu1
         }
         # Launch submenu11
@@ -182,8 +184,8 @@ function mainMenu {
             $Type = 'NewFile'
             $Print = "New Files"
             $P1 = "Name"
-            $P2 = "Length"
-            $P3 = "LastWriteTime"
+            $P2 = "Directory"
+            $P3 = "Filehash"
             subMenu1
         }
         # Launch submenu12
@@ -222,6 +224,15 @@ function mainMenu {
             $P3 = "ConnectionState"
             subMenu1
         }
+        # Launch submenu16
+        if($mainMenu -eq 16){
+            $Type = 'tasks'
+            $Print = "Scheduled Tasks"
+            $P1 = "TaskName"
+            $P2 = "TaskPath"
+            $P3 = "State"
+            subMenu1
+        }
     }
 }
 
@@ -249,6 +260,8 @@ function subMenu1 {
         Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "6"; Write-Host -ForegroundColor Green -NoNewline "]"; `
             Write-Host -ForegroundColor Green " Workstations with a specific $Print - last day"
         Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "7"; Write-Host -ForegroundColor Green -NoNewline "]"; `
+            Write-Host -ForegroundColor Green " Workstations with a specific $Print - all time"
+        Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "8"; Write-Host -ForegroundColor Green -NoNewline "]"; `
             Write-Host -ForegroundColor Green " Workstations without a specific $Print - last day"
         $subMenu1 = Read-Host "`nSelection (leave blank to quit)"
         $timeStamp = Get-Date -Uformat %m%d%y%H%M
@@ -277,6 +290,10 @@ function subMenu1 {
             6_Item_On_System_Latest
         }
         # Option 7
+        if($subMenu1 -eq 7){
+            8_Item_On_System_alltime
+        }
+        # Option 8
         if($subMenu1 -eq 7){
             7_Item_Not_On_System_Latest
         }
@@ -394,15 +411,21 @@ function subMenu3 {
         Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "8"; Write-Host -ForegroundColor Green -NoNewline "]"; `
             Write-Host -ForegroundColor Green " Query by session state established"
         Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "9"; Write-Host -ForegroundColor Green -NoNewline "]"; `
-            Write-Host -ForegroundColor Green " Query by PID"
+            Write-Host -ForegroundColor Green " Query by Process ID"
         Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "10"; Write-Host -ForegroundColor Green -NoNewline "]"; `
-            Write-Host -ForegroundColor Green " Query by EXE"
+            Write-Host -ForegroundColor Green " Query by Process name"
         Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "11"; Write-Host -ForegroundColor Green -NoNewline "]"; `
             Write-Host -ForegroundColor Green " Query Ports except custom ports.  Up to three may be entered"
         Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "12"; Write-Host -ForegroundColor Green -NoNewline "]"; `
             Write-Host -ForegroundColor Green " Query Ports without ports 0,80, and 443"
         Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "13"; Write-Host -ForegroundColor Green -NoNewline "]"; `
             Write-Host -ForegroundColor Green " Query for non-local remote IP addresses"
+        Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "14"; Write-Host -ForegroundColor Green -NoNewline "]"; `
+            Write-Host -ForegroundColor Green " Query by remote address - all time"
+        Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "15"; Write-Host -ForegroundColor Green -NoNewline "]"; `
+            Write-Host -ForegroundColor Green " Query by host Name - latest"
+        Write-Host -ForegroundColor Green -NoNewline "`n["; Write-Host -NoNewline "16"; Write-Host -ForegroundColor Green -NoNewline "]"; `
+            Write-Host -ForegroundColor Green " Query by host name - all time"
         $subMenu3 = Read-Host "`nSelection (leave blank to quit)"
         $timeStamp = Get-Date -Uformat %m%d%y%H%M
         # Option 1
@@ -463,10 +486,10 @@ function subMenu3 {
             23_Agents_latest
         }
         # Option 10
-        if($subMenu3 -eq 9){
-        $agent = "EXE"
-        $value = read-host -Prompt "Please enter the PID you want to search for"
-        $Title = "Network Connections being used by PID $value"
+        if($subMenu3 -eq 10){
+        $agent = "ProcessName"
+        $value = read-host -Prompt "Please enter the Process you want to search for"
+        $Title = "Network Connections being used by Process $value"
             23_Agents_latest
         }
         # Option 11
@@ -496,6 +519,21 @@ function subMenu3 {
         $NP3 = "127.0.0.1"
             25_netstat_noweb
         }
+        # Option 14
+        if($subMenu3 -eq 14){
+        $agent = "ForeignAddressIP"
+        $value = read-host -Prompt "Please enter the remote IP you want to search for"
+        $Title = "Network connections with $value as the remote IP"
+            24_Agent_Query_AllTime
+        }
+        # Option 15
+        if($subMenu3 -eq 15){
+            4_By_System_Latest
+        }
+        # Option 15
+        if($subMenu3 -eq 16){
+            5_By_System_AllTime
+        }
     }
 }
 
@@ -514,7 +552,7 @@ function 1_New_Days{
 $Days = read-host -Prompt "Please enter the number of days you would like to look for new $Type"
 
 #Identify CSV files created in the last day and combine them
-$New_Files = Get-ChildItem -Recurse -path "$Results\*\*\*\_Summary\Summary_$Type.csv" | Where-Object {$_.CreationTime  -ge (get-Date).Date.AddDays(-$Days)} | 
+$New_Files = Get-ChildItem -Recurse -path "$Results\*\*\*\_Summary\Summary_$Type.csv" | Sort-object CreationTime -Descending | select -First "$Days" |
 foreach-object {Import-Csv -path $PSItem.fullname } | 
 Group-Object -Property PSComputerName,$P1,$P2,$P3 |
 Select-Object @{Name='PSComputerName'; Expression={$_.Values[0]}},
@@ -523,7 +561,7 @@ Select-Object @{Name='PSComputerName'; Expression={$_.Values[0]}},
                    @{Name="$P3"; Expression={$_.Values[3]}}
 
 #Identify CSV documents over a day old
-$Old_Files = Get-ChildItem -Recurse -path "$Results\*\*\*\_Summary\Summary_$Type.csv" | Where-Object {$_.CreationTime -lt (get-Date).Date.AddDays(-$Days)} |
+$Old_Files = Get-ChildItem -Recurse -path "$Results\*\*\*\_Summary\Summary_$Type.csv" | Sort-object CreationTime -Descending | select -skip "$Days" |
 foreach-object {Import-Csv -path $PSItem.fullname } | 
 Group-Object -Property PSComputerName,$P1,$P2,$P3 |
 Select-Object @{Name='PSComputerName'; Expression={$_.Values[0]}},
@@ -560,7 +598,7 @@ function 2_Summary_Days{
 #Promt the user for the number of days they want to query
 $Days = read-host -Prompt "Please enter the number of days you would like to query for"
 # Identify the files created during this time frame and import them
-Get-ChildItem -Recurse -Path "$Results\*\*\*\_Summary\Summary_$Type.csv" | Where-Object {$_.CreationTime -gt (get-Date).Date.Adddays(-$Days)} | # Get each CSV File
+Get-ChildItem -Recurse -Path "$Results\*\*\*\_Summary\Summary_$Type.csv" | Sort-object CreationTime -Descending | select -First "$Days" | # Get each CSV File
      ForEach-Object -Process { 
         Import-csv -path $PSItem.fullname # Import CSV Data
      }  | Sort-Object -property PSComputerName,$P1,$P2,$P3 -Unique |
@@ -615,12 +653,12 @@ function 4_By_System_Latest{
 $hostname = read-host -Prompt "Please Enter the Hostname you wish to search for"
 
 #Pull CSV files created yesterday and filter results based on hostname
-$List = Get-ChildItem -Recurse -Path "$Results\$Yesterday_year\$Yesterday_Month\$Yesterday_Day\_Summary\Summary_$Type.csv" |
+$List = Get-ChildItem -Recurse -Path "$Results\*\*\*\_Summary\Summary_$Type.csv" | sort-object CreationTime -Descending | select -First 1 |
      ForEach-Object -Process { 
         Import-Csv -path $PSItem.fullname | where-Object {($_.PSComputerName -match "$Hostname")}
  } 
  #Display results in gridview      
-$List | Sort PSComputerName,"$P1","$P2","$P3" -Unique | Out-Gridview -Title "$print on $hostname - All Time"
+$List | Sort PSComputerName,"$P1","$P2","$P3" -Unique | Out-Gridview -Title "$print on $hostname - Latest"
 }
 
 <#
@@ -650,13 +688,28 @@ function 6_Item_On_System_Latest{
 $Item = read-host -Prompt "Please Enter the $Type you wish to search for"
 
 #Query the latest CSV files for the item
-$List = Get-ChildItem -Recurse -Path "$Results\$Yesterday_year\$Yesterday_Month\$Yesterday_Day\_Summary\Summary_$Type.csv" |
+$List = Get-ChildItem -Recurse -Path "$Results\*\*\*\_Summary\Summary_$Type.csv" | sort-object CreationTime -Descending | select -First 1 |
      ForEach-Object -Process { 
-        Import-Csv -path $PSItem.fullname | where-Object {($_.$P1 -match "$Item")  -or ($_.$P2 -contains "$Item") -or ($_.$P3 -contains "$Item")}
+        Import-Csv -path $PSItem.fullname | where-Object {($_.$P1 -like "*$Item*")  -or ($_.$P2 -like "*$Item*") -or ($_.$P3 -like "*$Item*")}
  } 
 # display the results in a gridview      
 $List | Sort PSComputerName,"$P1","$P2","$P3" -Unique | Out-Gridview -Title "Workstations with $print"
 }
+
+function 8_Item_On_System_alltime{
+#Prompt user for the item they want to search for
+$Item = read-host -Prompt "Please Enter the $Type you wish to search for"
+
+#Query the latest CSV files for the item
+$List = Get-ChildItem -Recurse -Path "$Results\*\*\*\_Summary\Summary_$Type.csv" |
+     ForEach-Object -Process { 
+        Import-Csv -path $PSItem.fullname | where-Object {($_.$P1 -like "*$Item*")  -or ($_.$P2 -like "*$Item*") -or ($_.$P3 -like "*$Item*")}
+ } 
+# display the results in a gridview      
+$List | Sort PSComputerName,"$P1","$P2","$P3" -Unique | Out-Gridview -Title "Workstations with $print"
+}
+
+
 
 <#
 Function 7 - Query for systems without a specific item
@@ -669,13 +722,13 @@ function 7_Item_Not_On_System_Latest{
 #Prompt user for the item you are searching for
 $Item = read-host -Prompt "Please Enter the $Type you wish to search for"
 #Query the latest CSV files for the item, and export the results
-$List = Get-ChildItem -Recurse -Path "$Results\$Yesterday_year\$Yesterday_Month\$Yesterday_Day\_Summary\Summary_$Type.csv" |
+$List = Get-ChildItem -Recurse -Path "$Results\*\*\*\_Summary\Summary_$Type.csv" | sort-object CreationTime -Descending | select -First 1 |
      ForEach-Object -Process { 
-        Import-Csv -path $PSItem.fullname | where-Object {($_.$P1 -match "$Item")  -or ($_.$P2 -contains "$Item") -or ($_.$P3 -contains "$Item")}
+        Import-Csv -path $PSItem.fullname | where-Object {($_.$P1 -like "*$Item*")  -or ($_.$P2 -like "*$Item*") -or ($_.$P3 -like "*$Item*")}
  } | Sort PSComputerName,"$P1","$P2","$P3" -Unique       
 
  #Import the latest Master CSV file
-$Master = Import-Csv -Path "$Results\$Yesterday_year\$Yesterday_Month\$Yesterday_Day\_Summary\Summary_master.csv"
+$Master = Import-Csv -Path "$Results\*\*\*\_Summary\Summary_master.csv" | sort-object CreationTime -Descending | select -First 1 |
 
 #Create a filter to only show the right side of the output
 filter rightside{
@@ -702,9 +755,9 @@ function 21_Master_List_date{
 #Prompt user for the number of days to query
 $Days = read-host -Prompt "Please enter the number of days you would like to query for."
 #Import the CSV files, and sort by Computer Name
-$files = Get-ChildItem -Recurse -Path "$Results\*\*\*\_Summary\Summary_$Type.csv" | Where-Object {$_.CreationTime -gt (get-Date).Date.Adddays(-$Days)} | # Get each CSV File
+$files = Get-ChildItem -Recurse -Path "$Results\*\*\*\_Summary\Summary_$Type.csv" | Sort-object CreationTime -Descending | select -First "$Days" | # Get each CSV File
      ForEach-Object -Process { 
-        Import-csv -path $_ } | Sort PSComputerName -Unique
+        Import-csv -path $_ } 
 
         
   # Output the list in a gridview       
@@ -717,13 +770,25 @@ This function searches the latest results for the clients with or without the ag
 It is also used for Netstat queries for ports, protocols, state, PID, EXE queries
 #>
 function 23_Agents_Latest{
-$list = Get-ChildItem -Recurse -Path "$Results\$Yesterday_year\$Yesterday_Month\$Yesterday_Day\_Summary\Summary_$Type.csv" |  # Get each CSV File
+$list = Get-ChildItem -Recurse -Path "$Results\*\*\*\_Summary\Summary_$Type.csv" | sort-object CreationTime -Descending | select -First 1 |
      ForEach-Object -Process { 
-        Import-csv -path $_ | where-object {($_.$Agent -contains "$value")} 
+        Import-csv -path $_ | where-object {($_.$Agent -like "*$value*")} 
  }       
          
   $list | Out-Gridview -Title "$Title"
   }
+
+  function 24_Agent_Query_AllTime{
+  $list = Get-ChildItem -Recurse -Path "$Results\*\*\*\_Summary\Summary_$Type.csv" |
+     ForEach-Object -Process { 
+        Import-csv -path $_ | where-object {($_.$Agent -like "*$value*")} 
+ }       
+         
+  $list | Out-Gridview -Title "$Title"
+
+  }
+
+
 
 <#
 Function 25 - Netstat query with filtered results
@@ -732,9 +797,9 @@ option 12 - removes ports 80, 443, and 0
 option 13 - removes local IP subnet, 0.0.0.0, and 127.0.0.1
 #>
 function 25_netstat_noweb{
-  $list = Get-ChildItem -Recurse -Path "$Results\$Yesterday_year\$Yesterday_Month\$Yesterday_Day\_Summary\Summary_$Type.csv" |  # Get each CSV File
+  $list = Get-ChildItem -Recurse -Path "$Results\*\*\*\_Summary\Summary_$Type.csv" | sort-object CreationTime -Descending | select -First 1 | # Get each CSV File
      ForEach-Object -Process { 
-        Import-csv -path $_ | where-object {($_.$Agent -notlike "$NP1") -and ($_.$Agent -notcontains "$NP2") -and ($_.$Agent -notcontains "$NP3")} 
+        Import-csv -path $_ | where-object {($_.$Agent -notlike "$NP1") -and ($_.$Agent -notlike "*$NP2*") -and ($_.$Agent -notlike "*$NP3*")} 
  }       
          
   $list | Out-Gridview -Title "$Title"

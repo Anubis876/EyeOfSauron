@@ -63,7 +63,7 @@ $Yesterday_year = (get-date).date.adddays(-1).ToString("yyyy")
 $DATE = Get-Date -format "yyyy-MM-dd"
 $yestderday = (get-date).date.adddays(-1).ToString("yyyy-MM-dd")
 $folder = "$Results\*\*\*"
-$types = "Admins","LocalAccounts","Master","NetStat","NewEXE","NewFile","Printers","Processes","Products","Services","Shares","Startup","Updates","DNS","OutSessions"
+$types = "Admins","LocalAccounts","Master","NetStat","NewEXE","NewFile","Printers","Processes","Products","Services","Shares","Startup","Updates","DNS","OutSessions","Tasks"
 
 
 #****************************************************************************************
